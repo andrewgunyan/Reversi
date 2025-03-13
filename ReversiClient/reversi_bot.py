@@ -6,6 +6,43 @@ class ReversiBot:
     def __init__(self, move_num):
         self.move_num = move_num
 
+    def cutoff_test(self, state, depth, max_depth = 4):
+        return depth >= max_depth or len(state.get_valid_moves()) == 0
+
+    def alpha_beta_search(self, state):
+        best_action = None
+        v = -float('inf')
+        alpha, beta = -float('inf'), float('inf')
+
+        for action, successor in state.successors():
+            min_val = self.min_value(successor, alpha, beta, depth=1)
+            if min_val > v:
+                v = min_val
+                best_action = action
+        return best_action
+    
+    def max_value(self, state, alpha, beta, depth):
+        if self.cutoff_test(state, depth):
+            return self.heuristic_evaluation(state)
+        v = -float('inf')
+        for action, successor in state.successors():
+            v = max(v, self.min_value(successor, alpha, beta, depth+1))
+            if v >= beta:
+                return v
+            alpha = max(alpha, v)
+        return v
+    
+    def min_value(self, state, alpha, beta, depth):
+        if self.cutoff_test(state, depth):
+            return self.heuristic_evaluation(state)
+        v = float('inf')
+        for action, successor in state.successors():
+            v = min(v, self.max_value(successor, alpha, beta, depth+1))
+            if v <= alpha:
+                return v
+            beta = min(beta, v)
+        return v
+
     def heuristic_evaluation(self, state): 
         my_color = 1                        # assume I am player one. Fix that later once I understand more
         opp_color = 2
@@ -165,8 +202,7 @@ class ReversiBot:
 
         print(self.heuristic_evaluation(state))
 
-        valid_moves = state.get_valid_moves()
-        move = rand.choice(valid_moves)
+        move = self.alpha_beta_search(state)
 
         return move
 

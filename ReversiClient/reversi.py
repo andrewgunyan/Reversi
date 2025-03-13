@@ -112,3 +112,24 @@ class ReversiGameState:
                         valid_moves.append((row, col))
 
         return valid_moves
+
+    def successors(self):
+        """Generates all valid moves and their resulting states."""
+        valid_moves = self.get_valid_moves()  # Get valid moves for the current player
+        successor_states = []
+
+        for move in valid_moves:
+            new_state = self.copy()  # Create a copy of the board state
+            new_state.make_move(move)  # Apply the move
+            successor_states.append((move, new_state))  # Store (move, new state)
+
+        return successor_states
+
+    def copy(self):
+        return ReversiGameState(np.copy(self.board), self.turn)
+
+    def make_move(self, move):
+        row, col = move
+        self.board[row, col] = self.turn  # Place the piece
+        self.flip_pieces(row, col)  # Flip the captured pieces (implement this)
+        self.turn = 3 - self.turn  # Switch turn (1 → 2, 2 → 1)
