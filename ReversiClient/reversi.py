@@ -133,3 +133,23 @@ class ReversiGameState:
         self.board[row, col] = self.turn  # Place the piece
         self.flip_pieces(row, col)  # Flip the captured pieces (implement this)
         self.turn = 3 - self.turn  # Switch turn (1 → 2, 2 → 1)
+
+    def flip_pieces(self, row, col):
+        """Flips opponent's pieces according to Reversi rules after a move."""
+        directions = [(-1, -1), (-1, 0), (-1, 1),
+                    (0, -1),         (0, 1),
+                    (1, -1), (1, 0), (1, 1)]
+
+        for xdir, ydir in directions:
+            to_flip = []
+            r, c = row + ydir, col + xdir
+
+            while self.space_is_on_board(r, c) and self.board[r, c] == (3 - self.turn):
+                to_flip.append((r, c))
+                r += ydir
+                c += xdir
+
+            # Only flip if we reach a piece of the current player
+            if self.space_is_on_board(r, c) and self.board[r, c] == self.turn:
+                for fr, fc in to_flip:
+                    self.board[fr, fc] = self.turn
