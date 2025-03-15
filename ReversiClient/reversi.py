@@ -112,3 +112,44 @@ class ReversiGameState:
                         valid_moves.append((row, col))
 
         return valid_moves
+
+    def successors(self):
+        """Generates all valid moves and their resulting states."""
+        valid_moves = self.get_valid_moves()  # Get valid moves for the current player
+        successor_states = []
+
+        for move in valid_moves:
+            new_state = self.copy()  # Create a copy of the board state
+            new_state.make_move(move)  # Apply the move
+            successor_states.append((move, new_state))  # Store (move, new state)
+
+        return successor_states
+
+    def copy(self):
+        return ReversiGameState(np.copy(self.board), self.turn)
+
+    def make_move(self, move):
+        row, col = move
+        self.board[row, col] = self.turn  # Place the piece
+        self.flip_pieces(row, col)  # Flip the captured pieces (implement this)
+        self.turn = 3 - self.turn  # Switch turn (1 → 2, 2 → 1)
+
+    def flip_pieces(self, row, col):
+        """Flips opponent's pieces according to Reversi rules after a move."""
+        directions = [(-1, -1), (-1, 0), (-1, 1),
+                    (0, -1),         (0, 1),
+                    (1, -1), (1, 0), (1, 1)]
+
+        for xdir, ydir in directions:
+            to_flip = []
+            r, c = row + ydir, col + xdir
+
+            while self.space_is_on_board(r, c) and self.board[r, c] == (3 - self.turn):
+                to_flip.append((r, c))
+                r += ydir
+                c += xdir
+
+            # Only flip if we reach a piece of the current player
+            if self.space_is_on_board(r, c) and self.board[r, c] == self.turn:
+                for fr, fc in to_flip:
+                    self.board[fr, fc] = self.turn
